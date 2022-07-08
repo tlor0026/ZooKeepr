@@ -4,6 +4,7 @@ const { animals } = require('./data/animals');
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const app = express();
+app.use(express.static('public'));
 // parse incoming string or array data
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
@@ -85,23 +86,34 @@ app.get('/api/animals', (req, res) => {
     const animal = createNewAnimal(req.body, animals);
     res.json(animal);
   }
-  });
+});
+function validateAnimal(animal) {
+  if (!animal.name || typeof animal.name !== 'string') {
+    return false;
+  }
+  if (!animal.species || typeof animal.species !== 'string') {
+    return false;
+  }
+  if (!animal.diet || typeof animal.diet !== 'string') {
+    return false;
+  }
+  if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+    return false;
+  }
+  return true;
+}
   app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
   });
-  function validateAnimal(animal) {
-    if (!animal.name || typeof animal.name !== 'string') {
-      return false;
-    }
-    if (!animal.species || typeof animal.species !== 'string') {
-      return false;
-    }
-    if (!animal.diet || typeof animal.diet !== 'string') {
-      return false;
-    }
-    if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
-      return false;
-    }
-    return true;
-  }
-  
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/js/index.html'));
+  });
+  app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+  });
+  app.get('/zookeepers', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+  });
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
+  });
